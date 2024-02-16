@@ -13,9 +13,9 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.abto.checkpoint.ui.dashboard.DashboardFragment"
+        android:name="com.abto.checkpoint.ui.dashboard.LoginTelegramFragment"
         android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_login_telegram" />
 
     <fragment
         android:id="@+id/navigation_notifications"
