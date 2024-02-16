@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Checkpoint</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Telegram</string>
+    <string name="title_notifications">Stub</string>
+    <string name="title_myrotvorec">Миротворець</string>
+    <string name="title_telegram">Телеграм</string>
+    <string name="title_activity_login2">LoginActivity2</string>
+    <string name="prompt_email">Номер телефона</string>
+    <string name="name">Ім\ʼя</string>
+    <string name="surname">Фамілія</string>
+    <string name="father_name">По батькові</string>
+    <string name="prompt_password">Пароль</string>
+    <string name="action_sign_in">Вхід</string>
+    <string name="search">Пошук</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Пароль має містити >5 символів</string>
+    <string name="login_failed">"Не можу увійти. Перевірте доступ до інтернету"</string>
+    <string name="title_activity_login">LoginActivity</string>
+</resources>
