@@ -16,6 +16,7 @@ import kotlinx.telegram.coroutines.getChatHistory
 import kotlinx.telegram.coroutines.getChats
 import kotlinx.telegram.coroutines.getMe
 import kotlinx.telegram.coroutines.getUser
+import kotlinx.telegram.coroutines.sendMessage
 import kotlinx.telegram.coroutines.setAuthenticationPhoneNumber
 import kotlinx.telegram.coroutines.setTdlibParameters
 import kotlinx.telegram.extensions.ChatKtx
@@ -24,6 +25,7 @@ import kotlinx.telegram.flows.authorizationStateFlow
 import kotlinx.telegram.flows.userFlow
 import kotlinx.telegram.flows.userStatusFlow
 import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.td.libcore.telegram.TdApi.Message
 
 object TelegramRepository : UserKtx, ChatKtx {
 
@@ -67,6 +69,17 @@ object TelegramRepository : UserKtx, ChatKtx {
     suspend fun sendPassword(password: String) {
         api.checkAuthenticationPassword(
             password
+        )
+    }
+
+    suspend fun sendMessage(chatId: Long, text: String) {
+        api.sendMessage(
+            chatId,
+            0,
+            0,
+            null,
+            null,
+            TdApi.InputMessageText(TdApi.FormattedText(text, null), false, false)
         )
     }
 

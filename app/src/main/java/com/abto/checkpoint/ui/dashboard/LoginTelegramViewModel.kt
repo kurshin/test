@@ -18,6 +18,7 @@ class LoginTelegramViewModel: ViewModel() {
     val chatsData = MutableLiveData<List<TdApi.Chat>>()
     val messagesData = MutableLiveData<List<TdApi.Message>>()
     val fileDownloaded = MutableLiveData<String>()
+    var currentChatId: Long? = null
 
     private val scope = viewModelScope + CoroutineExceptionHandler { _, throwable ->
         error.postValue(throwable.message)
@@ -35,13 +36,25 @@ class LoginTelegramViewModel: ViewModel() {
         TelegramRepository.sendCode(code)
     }
 
+    fun sendPassword(password: String) = scope.launch {
+        TelegramRepository.sendPassword(password)
+    }
+
+    fun sendMessage(text: String) = scope.launch {
+        currentChatId?.let {
+            TelegramRepository.sendMessage(it, text)
+        }
+    }
+
     fun getChats() = scope.launch {
+        currentChatId = null
         TelegramRepository.getChats().let {
             chatsData.postValue(it)
         }
     }
 
     fun getMessages(chatId: Long) = scope.launch {
+        currentChatId = chatId
         TelegramRepository.getChatHistory(chatId).let {
             messagesData.postValue(it.toList())
         }

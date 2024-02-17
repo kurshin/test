@@ -36,7 +36,9 @@ class LoginTelegramFragment : Fragment() {
             viewModel.authState.observe(viewLifecycleOwner) { state ->
                 clPhoneNumber.isVisible = state == AuthState.EnterPhone
                 clOtp.isVisible = state == AuthState.EnterCode
+                clPassword.isVisible = state is AuthState.EnterPassword
                 rvChats.isVisible = state == AuthState.LoggedIn
+                llChat.isVisible = state == AuthState.LoggedIn
                 if (state == AuthState.LoggedIn) {
                     viewModel.getChats()
                 }
@@ -44,16 +46,17 @@ class LoginTelegramFragment : Fragment() {
             viewModel.getChats()
             viewModel.chatsData.observe(viewLifecycleOwner) {
                 rvChats.isVisible = true
-                rvMessages.isVisible = false
+                llChat.isVisible = false
                 clPhoneNumber.isVisible = false
                 clOtp.isVisible = false
+                clPassword.isVisible = false
                 rvChats.adapter = ChatAdapter(it) {chat ->
                     viewModel.getMessages(chat.id)
                 }
             }
             viewModel.messagesData.observe(viewLifecycleOwner) {
                 rvChats.isVisible = false
-                rvMessages.isVisible = true
+                llChat.isVisible = true
                 rvMessages.adapter = MessagesAdapter(it) { message ->
                     Toast.makeText(requireContext(), message.content.toString(), Toast.LENGTH_SHORT).show()
                     message.content.let { content ->
@@ -62,7 +65,6 @@ class LoginTelegramFragment : Fragment() {
                         }
                     }
                 }
-                rvMessages.adapter?.notifyDataSetChanged()
             }
             viewModel.fileDownloaded.observe(viewLifecycleOwner) { filePath ->
                 Toast.makeText(requireContext(), "File downloaded: $filePath", Toast.LENGTH_SHORT).show()
@@ -77,6 +79,20 @@ class LoginTelegramFragment : Fragment() {
             }
             btnVerifyOtp.setOnClickListener {
                 viewModel.sendCode(etOtp.text.toString())
+            }
+            btnVerifyPassword.setOnClickListener {
+                viewModel.sendPassword(etPassword.text.toString())
+            }
+            btnSendMessage.setOnClickListener {
+                viewModel.currentChatId?.let {
+                    viewModel.sendMessage(etMessage.text.toString())
+                    etMessage.text.clear()
+                }
+            }
+            btnRefresh.setOnClickListener {
+                viewModel.currentChatId?.let {
+                    viewModel.getMessages(it)
+                }
             }
         }
     }
