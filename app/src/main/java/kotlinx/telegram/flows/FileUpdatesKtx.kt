@@ -20,7 +20,7 @@ fun TelegramFlow.fileFlow(): Flow<File> = this.getUpdatesFlowOfType<TdApi.Update
 
 /**
  * emits [UpdateFileGenerationStart] if the file generation process needs to be started by the
- * client.
+ * application.
  */
 fun TelegramFlow.fileGenerationStartFlow(): Flow<UpdateFileGenerationStart> =
     this.getUpdatesFlowOfType()

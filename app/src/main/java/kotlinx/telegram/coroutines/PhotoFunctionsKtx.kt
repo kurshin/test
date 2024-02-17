@@ -7,10 +7,10 @@ package kotlinx.telegram.coroutines
 import kotlin.Long
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
-import org.drinkless.td.libcore.telegram.TdApi.InputFile
+import org.drinkless.td.libcore.telegram.TdApi.InputChatPhoto
 
 /**
- * Suspend function, which deletes a profile photo. If something changes, updateUser will be sent.
+ * Suspend function, which deletes a profile photo.
  *
  * @param profilePhotoId Identifier of the profile photo to delete.
  */
@@ -18,10 +18,9 @@ suspend fun TelegramFlow.deleteProfilePhoto(profilePhotoId: Long) =
     this.sendFunctionLaunch(TdApi.DeleteProfilePhoto(profilePhotoId))
 
 /**
- * Suspend function, which uploads a new profile photo for the current user. If something changes,
- * updateUser will be sent.
+ * Suspend function, which changes a profile photo for the current user.
  *
- * @param photo Profile photo to set. inputFileId and inputFileRemote may still be unsupported.
+ * @param photo Profile photo to set.
  */
-suspend fun TelegramFlow.setProfilePhoto(photo: InputFile?) =
+suspend fun TelegramFlow.setProfilePhoto(photo: InputChatPhoto?) =
     this.sendFunctionLaunch(TdApi.SetProfilePhoto(photo))

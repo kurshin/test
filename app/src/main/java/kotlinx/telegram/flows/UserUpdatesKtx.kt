@@ -22,13 +22,13 @@ fun TelegramFlow.userStatusFlow(): Flow<UpdateUserStatus> = this.getUpdatesFlowO
 
 /**
  * emits [User] if some data of a user has changed. This update is guaranteed to come before the
- * user identifier is returned to the client.
+ * user identifier is returned to the application.
  */
 fun TelegramFlow.userFlow(): Flow<User> = this.getUpdatesFlowOfType<TdApi.UpdateUser>()
     .mapNotNull { it.user }
 
 /**
- * emits [UpdateUserFullInfo] if some data from userFullInfo has been changed.
+ * emits [UpdateUserFullInfo] if some data in userFullInfo has been changed.
  */
 fun TelegramFlow.userFullInfoFlow(): Flow<UpdateUserFullInfo> = this.getUpdatesFlowOfType()
 
@@ -39,8 +39,8 @@ fun TelegramFlow.userPrivacySettingRulesFlow(): Flow<UpdateUserPrivacySettingRul
     this.getUpdatesFlowOfType()
 
 /**
- * emits usersNearby [ChatNearby[]] if list of users nearby has changed. The update is sent only 60
- * seconds after a successful searchChatsNearby request.
+ * emits usersNearby [ChatNearby[]] if the list of users nearby has changed. The update is
+ * guaranteed to be sent only 60 seconds after a successful searchChatsNearby request.
  */
 fun TelegramFlow.usersNearbyFlow(): Flow<Array<ChatNearby>> =
     this.getUpdatesFlowOfType<TdApi.UpdateUsersNearby>()

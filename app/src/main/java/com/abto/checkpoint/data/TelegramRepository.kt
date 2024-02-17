@@ -28,6 +28,9 @@ import org.drinkless.td.libcore.telegram.TdApi
 object TelegramRepository : UserKtx, ChatKtx {
 
     override val api: TelegramFlow = TelegramFlow()
+    override suspend fun TdApi.User.get() = api.getMe()
+
+    override suspend fun TdApi.Chat.get() = api.getChat(id)
 
     val authFlow = api.authorizationStateFlow()
         .onEach {
@@ -70,8 +73,6 @@ object TelegramRepository : UserKtx, ChatKtx {
     suspend fun getChats() =
         api.getChats(
             TdApi.ChatListMain(),
-            Long.MAX_VALUE,
-            0,
             100
         ).chatIds.map { api.getChat(it) }
 
@@ -80,41 +81,4 @@ object TelegramRepository : UserKtx, ChatKtx {
 
     suspend fun downloadFile(fileId: Int) =
         api.downloadFile(fileId, 1, 0, 0, true).local.path
-
-    val userInfoFlow = flowOf(
-        api.userFlow(),
-        api.userStatusFlow().map {
-            api.getUser(it.userId.toInt())
-        }
-    ).flattenMerge().map { user: TdApi.User ->
-        val chat = getChats()
-            .filter { it.title == "Checkpoint1715" }
-            .map { api.getChatHistory(it.id, 0, 0, 100, false) }
-            .map { it.messages.first().content } //get pdf
-            .map { it as TdApi.MessageDocument }
-            .map { it.document }
-            .map { it as TdApi.Document } // download pdf
-            .map { api.downloadFile(it.document.id, 1, 0, 0, true) }
-            .map { it.local.path }
-        if (api.getMe().id == user.id) "it's me!"
-        else {
-            val userInfo = arrayListOf(user.firstName)
-
-            if (user.getFullInfo().groupInCommonCount > 0) {
-                user.getGroupsInCommon(0, 10).chatIds.map {
-                    api.getChat(it).let { chat ->
-                        val admins = chat.getAdministrators().administrators.map { admin ->
-                            api.getUser(admin.userId.toInt()).firstName
-                        }.joinToString()
-                        "    '${chat.title}'" +
-                                (" admins: $admins".takeIf { admins.isNotBlank() } ?: "")
-                    }
-                }.joinToString("\n").let {
-                    userInfo.add(" has chats in common:\n$it")
-                }
-            }
-
-            userInfo.joinToString()
-        }
-    }.retryWhen { cause, _ -> cause is TelegramException }
 }

@@ -9,8 +9,8 @@ object TelegramCredentials {
         databaseDirectory = "/data/user/0/com.abto.checkpoint/files/td"
         useMessageDatabase = false
         useSecretChats = false
-        apiId = 26990344
-        apiHash = "27e333f24d0084180dfc4dee11d2b871"
+        apiId = 23801008//26990344
+        apiHash = "3934a2cdaa79704eaa5c7790742ffb68"//"27e333f24d0084180dfc4dee11d2b871"
         useFileDatabase = true
         systemLanguageCode = "en"
         deviceModel = "Android"

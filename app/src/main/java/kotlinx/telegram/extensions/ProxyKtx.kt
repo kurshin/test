@@ -34,7 +34,7 @@ interface ProxyKtx : BaseKtx {
    *
    * @param server Proxy server IP address.  
    * @param port Proxy server port.  
-   * @param enable True, if the proxy should be enabled.  
+   * @param enable True, if the proxy needs to be enabled.  
    * @param type Proxy type.
    *
    * @return [TdApi.Proxy] Contains information about a proxy server.
@@ -57,7 +57,7 @@ interface ProxyKtx : BaseKtx {
    * for SOCKS5 and MTProto proxies. Can be called before authorization.
    *
    *
-   * @return [TdApi.Text] Contains some text.
+   * @return [TdApi.HttpUrl] Contains an HTTP URL.
    */
   suspend fun Proxy.getLink() = api.getProxyLink(this.id)
 

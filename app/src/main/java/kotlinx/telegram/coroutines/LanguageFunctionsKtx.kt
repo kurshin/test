@@ -57,7 +57,7 @@ suspend fun TelegramFlow.getLanguagePackInfo(languagePackId: String?): LanguageP
 /**
  * Suspend function, which returns a string stored in the local database from the specified
  * localization target and language pack by its key. Returns a 404 error if the string is not found.
- * This is an offline method. Can be called before authorization. Can be called synchronously.
+ * Can be called synchronously.
  *
  * @param languagePackDatabasePath Path to the language pack database in which strings are stored.  
  * @param localizationTarget Localization target to which the language pack belongs.  
@@ -90,8 +90,8 @@ suspend fun TelegramFlow.getLanguagePackStrings(languagePackId: String?, keys: A
 
 /**
  * Suspend function, which returns an IETF language tag of the language preferred in the country,
- * which should be used to fill native fields in Telegram Passport personal details. Returns a 404
- * error if unknown.
+ * which must be used to fill native fields in Telegram Passport personal details. Returns a 404 error
+ * if unknown.
  *
  * @param countryCode A two-letter ISO 3166-1 alpha-2 country code.
  *

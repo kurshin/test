@@ -7,11 +7,20 @@ package kotlinx.telegram.coroutines
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
 import org.drinkless.td.libcore.telegram.TdApi.Count
+import org.drinkless.td.libcore.telegram.TdApi.Countries
 import org.drinkless.td.libcore.telegram.TdApi.Text
 
 /**
- * Suspend function, which uses current user IP to found their country. Returns two-letter ISO
- * 3166-1 alpha-2 country code. Can be called before authorization.
+ * Suspend function, which returns information about existing countries. Can be called before
+ * authorization.
+ *
+ * @return [Countries] Contains information about countries.
+ */
+suspend fun TelegramFlow.getCountries(): Countries = this.sendFunctionAsync(TdApi.GetCountries())
+
+/**
+ * Suspend function, which uses the current IP address to find the current country. Returns
+ * two-letter ISO 3166-1 alpha-2 country code. Can be called before authorization.
  *
  * @return [Text] Contains some text.
  */

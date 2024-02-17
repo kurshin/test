@@ -4,13 +4,41 @@
 //
 package kotlinx.telegram.coroutines
 
+import kotlin.Array
 import kotlin.Boolean
+import kotlin.Long
 import kotlin.String
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.td.libcore.telegram.TdApi.AnimatedEmoji
 import org.drinkless.td.libcore.telegram.TdApi.Emojis
 import org.drinkless.td.libcore.telegram.TdApi.HttpUrl
 import org.drinkless.td.libcore.telegram.TdApi.InputFile
+import org.drinkless.td.libcore.telegram.TdApi.Sticker
+
+/**
+ * Suspend function, which informs TDLib that a message with an animated emoji was clicked by the
+ * user. Returns a big animated sticker to be played or a 404 error if usual animation needs to be
+ * played.
+ *
+ * @param chatId Chat identifier of the message.  
+ * @param messageId Identifier of the clicked message.
+ *
+ * @return [Sticker] Describes a sticker.
+ */
+suspend fun TelegramFlow.clickAnimatedEmojiMessage(chatId: Long, messageId: Long): Sticker =
+    this.sendFunctionAsync(TdApi.ClickAnimatedEmojiMessage(chatId, messageId))
+
+/**
+ * Suspend function, which returns an animated emoji corresponding to a given emoji. Returns a 404
+ * error if the emoji has no animated emoji.
+ *
+ * @param emoji The emoji.
+ *
+ * @return [AnimatedEmoji] Describes an animated representation of an emoji.
+ */
+suspend fun TelegramFlow.getAnimatedEmoji(emoji: String?): AnimatedEmoji =
+    this.sendFunctionAsync(TdApi.GetAnimatedEmoji(emoji))
 
 /**
  * Suspend function, which returns an HTTP URL which can be used to automatically log in to the
@@ -42,12 +70,13 @@ suspend fun TelegramFlow.getStickerEmojis(sticker: InputFile?): Emojis =
  *
  * @param text Text to search for.  
  * @param exactMatch True, if only emojis, which exactly match text needs to be returned.  
- * @param inputLanguageCode IETF language tag of the user's input language; may be empty if unknown.
+ * @param inputLanguageCodes List of possible IETF language tags of the user's input language; may
+ * be empty if unknown.
  *
  * @return [Emojis] Represents a list of emoji.
  */
 suspend fun TelegramFlow.searchEmojis(
   text: String?,
   exactMatch: Boolean,
-  inputLanguageCode: String?
-): Emojis = this.sendFunctionAsync(TdApi.SearchEmojis(text, exactMatch, inputLanguageCode))
+  inputLanguageCodes: Array<String>?
+): Emojis = this.sendFunctionAsync(TdApi.SearchEmojis(text, exactMatch, inputLanguageCodes))

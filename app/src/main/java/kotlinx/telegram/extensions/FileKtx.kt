@@ -6,6 +6,8 @@ package kotlinx.telegram.extensions
 
 import kotlin.Boolean
 import kotlin.Int
+import kotlin.Long
+import kotlin.String
 import kotlinx.telegram.core.TelegramFlow
 import kotlinx.telegram.coroutines.cancelDownloadFile
 import kotlinx.telegram.coroutines.cancelUploadFile
@@ -14,8 +16,11 @@ import kotlinx.telegram.coroutines.downloadFile
 import kotlinx.telegram.coroutines.getAttachedStickerSets
 import kotlinx.telegram.coroutines.getFile
 import kotlinx.telegram.coroutines.getFileDownloadedPrefixSize
+import kotlinx.telegram.coroutines.getSuggestedFileName
 import kotlinx.telegram.coroutines.readFilePart
+import kotlinx.telegram.coroutines.reportChatPhoto
 import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.td.libcore.telegram.TdApi.ChatReportReason
 import org.drinkless.td.libcore.telegram.TdApi.File
 
 /**
@@ -56,13 +61,13 @@ interface FileKtx : BaseKtx {
    * @param priority Priority of the download (1-32). The higher the priority, the earlier the file
    * will be downloaded. If the priorities of two files are equal, then the last one for which
    * downloadFile was called will be downloaded first.  
-   * @param offset The starting position from which the file should be downloaded.  
-   * @param limit Number of bytes which should be downloaded starting from the &quot;offset&quot;
-   * position before the download will be automatically cancelled; use 0 to download without a limit.  
+   * @param offset The starting position from which the file needs to be downloaded.  
+   * @param limit Number of bytes which need to be downloaded starting from the &quot;offset&quot;
+   * position before the download will automatically be canceled; use 0 to download without a limit.  
    * @param synchronous If false, this request returns file state just after the download has been
    * started. If true, this request returns file state only after the download has succeeded, has
-   * failed, has been cancelled or a new downloadFile request with different offset/limit parameters
-   * was sent.
+   * failed, has been canceled or a new downloadFile request with different offset/limit parameters was
+   * sent.
    *
    * @return [TdApi.File] Represents a file.
    */
@@ -74,7 +79,7 @@ interface FileKtx : BaseKtx {
   ) = api.downloadFile(this.id, priority, offset, limit, synchronous)
 
   /**
-   * Suspend function, which returns a list of sticker sets attached to a file. Currently only
+   * Suspend function, which returns a list of sticker sets attached to a file. Currently, only
    * photos and videos can have attached sticker sets.
    *
    *
@@ -91,9 +96,9 @@ interface FileKtx : BaseKtx {
   suspend fun File.get() = api.getFile(this.id)
 
   /**
-   * Suspend function, which returns file downloaded prefix size from a given offset.
+   * Suspend function, which returns file downloaded prefix size from a given offset, in bytes.
    *
-   * @param offset Offset from which downloaded prefix size should be calculated.
+   * @param offset Offset from which downloaded prefix size needs to be calculated.
    *
    * @return [TdApi.Count] Contains a counter.
    */
@@ -101,9 +106,19 @@ interface FileKtx : BaseKtx {
       offset)
 
   /**
+   * Suspend function, which returns suggested name for saving a file in a given directory.
+   *
+   * @param directory Directory in which the file is supposed to be saved.
+   *
+   * @return [TdApi.Text] Contains some text.
+   */
+  suspend fun File.getSuggestedName(directory: String?) = api.getSuggestedFileName(this.id,
+      directory)
+
+  /**
    * Suspend function, which reads a part of a file from the TDLib file cache and returns read
-   * bytes. This method is intended to be used only if the client has no direct access to TDLib's file
-   * system, because it is usually slower than a direct read from the file.
+   * bytes. This method is intended to be used only if the application has no direct access to TDLib's
+   * file system, because it is usually slower than a direct read from the file.
    *
    * @param offset The offset from which to read the file.  
    * @param count Number of bytes to read. An error will be returned if there are not enough bytes
@@ -113,4 +128,18 @@ interface FileKtx : BaseKtx {
    * @return [TdApi.FilePart] Contains a part of a file.
    */
   suspend fun File.readPart(offset: Int, count: Int) = api.readFilePart(this.id, offset, count)
+
+  /**
+   * Suspend function, which reports a chat photo to the Telegram moderators. A chat photo can be
+   * reported only if chat.canBeReported.
+   *
+   * @param chatId Chat identifier.  
+   * @param reason The reason for reporting the chat photo.  
+   * @param text Additional report details; 0-1024 characters.
+   */
+  suspend fun File.reportChatPhoto(
+    chatId: Long,
+    reason: ChatReportReason?,
+    text: String?
+  ) = api.reportChatPhoto(chatId, this.id, reason, text)
 }

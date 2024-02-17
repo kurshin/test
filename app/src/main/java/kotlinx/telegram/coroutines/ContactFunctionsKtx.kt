@@ -7,7 +7,7 @@ package kotlinx.telegram.coroutines
 import kotlin.Array
 import kotlin.Boolean
 import kotlin.Int
-import kotlin.IntArray
+import kotlin.LongArray
 import kotlin.String
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
@@ -23,17 +23,17 @@ import org.drinkless.td.libcore.telegram.TdApi.Users
  * only if known, vCard is ignored.  
  * @param sharePhoneNumber True, if the new contact needs to be allowed to see current user's phone
  * number. A corresponding rule to userPrivacySettingShowPhoneNumber will be added if needed. Use the
- * field UserFullInfo.needPhoneNumberPrivacyException to check whether the current user needs to be
+ * field userFullInfo.needPhoneNumberPrivacyException to check whether the current user needs to be
  * asked to share their phone number.
  */
 suspend fun TelegramFlow.addContact(contact: Contact?, sharePhoneNumber: Boolean) =
     this.sendFunctionLaunch(TdApi.AddContact(contact, sharePhoneNumber))
 
 /**
- * Suspend function, which changes imported contacts using the list of current user contacts saved
- * on the device. Imports newly added contacts and, if at least the file database is enabled, deletes
- * recently deleted contacts. Query result depends on the result of the previous query, so only one
- * query is possible at the same time.
+ * Suspend function, which changes imported contacts using the list of contacts saved on the device.
+ * Imports newly added contacts and, if at least the file database is enabled, deletes recently deleted
+ * contacts. Query result depends on the result of the previous query, so only one query is possible at
+ * the same time.
  *
  * @param contacts The new list of contacts, contact's vCard are ignored and are not imported.
  *
@@ -72,7 +72,7 @@ suspend fun TelegramFlow.importContacts(contacts: Array<Contact>?): ImportedCont
  *
  * @param userIds Identifiers of users to be deleted.
  */
-suspend fun TelegramFlow.removeContacts(userIds: IntArray?) =
+suspend fun TelegramFlow.removeContacts(userIds: LongArray?) =
     this.sendFunctionLaunch(TdApi.RemoveContacts(userIds))
 
 /**

@@ -29,7 +29,7 @@ suspend fun TelegramFlow.getBackgroundUrl(name: String?, type: BackgroundType?):
 /**
  * Suspend function, which returns backgrounds installed by the user.
  *
- * @param forDarkTheme True, if the backgrounds needs to be ordered for dark theme.
+ * @param forDarkTheme True, if the backgrounds must be ordered for dark theme.
  *
  * @return [Backgrounds] Contains a list of backgrounds.
  */
@@ -63,9 +63,10 @@ suspend fun TelegramFlow.searchBackground(name: String?): Background =
  * Suspend function, which changes the background selected by the user; adds background to the list
  * of installed backgrounds.
  *
- * @param background The input background to use, null for filled backgrounds.  
- * @param type Background type; null for default background. The method will return error 404 if
- * type is null.  
+ * @param background The input background to use; pass null to create a new filled backgrounds or to
+ * remove the current background.  
+ * @param type Background type; pass null to use the default type of the remote background or to
+ * remove the current background.  
  * @param forDarkTheme True, if the background is chosen for dark theme.
  *
  * @return [Background] Describes a chat background.

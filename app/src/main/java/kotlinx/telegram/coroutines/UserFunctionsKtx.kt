@@ -5,33 +5,15 @@
 package kotlinx.telegram.coroutines
 
 import kotlin.Int
+import kotlin.Long
 import kotlin.String
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.td.libcore.telegram.TdApi.ChatPhotos
 import org.drinkless.td.libcore.telegram.TdApi.User
 import org.drinkless.td.libcore.telegram.TdApi.UserFullInfo
 import org.drinkless.td.libcore.telegram.TdApi.UserPrivacySetting
 import org.drinkless.td.libcore.telegram.TdApi.UserPrivacySettingRules
-import org.drinkless.td.libcore.telegram.TdApi.UserProfilePhotos
-import org.drinkless.td.libcore.telegram.TdApi.Users
-
-/**
- * Suspend function, which adds a user to the blacklist.
- *
- * @param userId User identifier.
- */
-suspend fun TelegramFlow.blockUser(userId: Int) = this.sendFunctionLaunch(TdApi.BlockUser(userId))
-
-/**
- * Suspend function, which returns users that were blocked by the current user.
- *
- * @param offset Number of users to skip in the result; must be non-negative.  
- * @param limit The maximum number of users to return; up to 100.
- *
- * @return [Users] Represents a list of users.
- */
-suspend fun TelegramFlow.getBlockedUsers(offset: Int, limit: Int): Users =
-    this.sendFunctionAsync(TdApi.GetBlockedUsers(offset, limit))
 
 /**
  * Suspend function, which returns a user that can be contacted to get support.
@@ -48,17 +30,16 @@ suspend fun TelegramFlow.getSupportUser(): User = this.sendFunctionAsync(TdApi.G
  *
  * @return [User] Represents a user.
  */
-suspend fun TelegramFlow.getUser(userId: Int): User = this.sendFunctionAsync(TdApi.GetUser(userId))
+suspend fun TelegramFlow.getUser(userId: Long): User = this.sendFunctionAsync(TdApi.GetUser(userId))
 
 /**
  * Suspend function, which returns full information about a user by their identifier.
  *
  * @param userId User identifier.
  *
- * @return [UserFullInfo] Contains full information about a user (except the full list of profile
- * photos).
+ * @return [UserFullInfo] Contains full information about a user.
  */
-suspend fun TelegramFlow.getUserFullInfo(userId: Int): UserFullInfo =
+suspend fun TelegramFlow.getUserFullInfo(userId: Long): UserFullInfo =
     this.sendFunctionAsync(TdApi.GetUserFullInfo(userId))
 
 /**
@@ -81,13 +62,13 @@ suspend fun TelegramFlow.getUserPrivacySettingRules(setting: UserPrivacySetting?
  * @param offset The number of photos to skip; must be non-negative.  
  * @param limit The maximum number of photos to be returned; up to 100.
  *
- * @return [UserProfilePhotos] Contains part of the list of user photos.
+ * @return [ChatPhotos] Contains a list of chat or user profile photos.
  */
 suspend fun TelegramFlow.getUserProfilePhotos(
-  userId: Int,
+  userId: Long,
   offset: Int,
   limit: Int
-): UserProfilePhotos = this.sendFunctionAsync(TdApi.GetUserProfilePhotos(userId, offset, limit))
+): ChatPhotos = this.sendFunctionAsync(TdApi.GetUserProfilePhotos(userId, offset, limit))
 
 /**
  * Suspend function, which finishes user registration. Works only when the current authorization
@@ -106,7 +87,7 @@ suspend fun TelegramFlow.registerUser(firstName: String?, lastName: String?) =
  * @param supergroupId Identifier of the supergroup or channel.  
  * @param username New value of the username. Use an empty string to remove the username.
  */
-suspend fun TelegramFlow.setSupergroupUsername(supergroupId: Int, username: String?) =
+suspend fun TelegramFlow.setSupergroupUsername(supergroupId: Long, username: String?) =
     this.sendFunctionLaunch(TdApi.SetSupergroupUsername(supergroupId, username))
 
 /**
@@ -120,18 +101,9 @@ suspend fun TelegramFlow.setUserPrivacySettingRules(setting: UserPrivacySetting?
     this.sendFunctionLaunch(TdApi.SetUserPrivacySettingRules(setting, rules))
 
 /**
- * Suspend function, which changes the username of the current user. If something changes,
- * updateUser will be sent.
+ * Suspend function, which changes the username of the current user.
  *
  * @param username The new value of the username. Use an empty string to remove the username.
  */
 suspend fun TelegramFlow.setUsername(username: String?) =
     this.sendFunctionLaunch(TdApi.SetUsername(username))
-
-/**
- * Suspend function, which removes a user from the blacklist.
- *
- * @param userId User identifier.
- */
-suspend fun TelegramFlow.unblockUser(userId: Int) =
-    this.sendFunctionLaunch(TdApi.UnblockUser(userId))

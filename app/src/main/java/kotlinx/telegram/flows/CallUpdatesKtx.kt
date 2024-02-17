@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
 import org.drinkless.td.libcore.telegram.TdApi.Call
+import org.drinkless.td.libcore.telegram.TdApi.GroupCall
+import org.drinkless.td.libcore.telegram.TdApi.UpdateGroupCallParticipant
+import org.drinkless.td.libcore.telegram.TdApi.UpdateNewCallSignalingData
 import org.drinkless.td.libcore.telegram.TdApi.UpdateNewCallbackQuery
 import org.drinkless.td.libcore.telegram.TdApi.UpdateNewInlineCallbackQuery
 
@@ -17,6 +20,27 @@ import org.drinkless.td.libcore.telegram.TdApi.UpdateNewInlineCallbackQuery
  */
 fun TelegramFlow.callFlow(): Flow<Call> = this.getUpdatesFlowOfType<TdApi.UpdateCall>()
     .mapNotNull { it.call }
+
+/**
+ * emits [GroupCall] if information about a group call was updated.
+ */
+fun TelegramFlow.groupCallFlow(): Flow<GroupCall> =
+    this.getUpdatesFlowOfType<TdApi.UpdateGroupCall>()
+    .mapNotNull { it.groupCall }
+
+/**
+ * emits [UpdateGroupCallParticipant] if information about a group call participant was changed. The
+ * updates are sent only after the group call is received through getGroupCall and only if the call is
+ * joined or being joined.
+ */
+fun TelegramFlow.groupCallParticipantFlow(): Flow<UpdateGroupCallParticipant> =
+    this.getUpdatesFlowOfType()
+
+/**
+ * emits [UpdateNewCallSignalingData] if new call signaling data arrived.
+ */
+fun TelegramFlow.newCallSignalingDataFlow(): Flow<UpdateNewCallSignalingData> =
+    this.getUpdatesFlowOfType()
 
 /**
  * emits [UpdateNewCallbackQuery] if a new incoming callback query; for bots only.

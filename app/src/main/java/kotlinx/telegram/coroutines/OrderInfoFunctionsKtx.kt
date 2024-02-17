@@ -31,7 +31,7 @@ suspend fun TelegramFlow.getSavedOrderInfo(): OrderInfo =
  *
  * @param chatId Chat identifier of the Invoice message.  
  * @param messageId Message identifier.  
- * @param orderInfo The order information, provided by the user.  
+ * @param orderInfo The order information, provided by the user; pass null if empty.  
  * @param allowSave True, if the order information can be saved.
  *
  * @return [ValidatedOrderInfo] Contains a temporary identifier of validated order information,

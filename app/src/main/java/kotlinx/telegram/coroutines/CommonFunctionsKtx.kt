@@ -8,13 +8,16 @@ import kotlin.Array
 import kotlin.Boolean
 import kotlin.Double
 import kotlin.Int
-import kotlin.IntArray
 import kotlin.Long
 import kotlin.LongArray
 import kotlin.String
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
 import org.drinkless.td.libcore.telegram.TdApi.AuthorizationState
+import org.drinkless.td.libcore.telegram.TdApi.BankCardInfo
+import org.drinkless.td.libcore.telegram.TdApi.BotCommand
+import org.drinkless.td.libcore.telegram.TdApi.BotCommandScope
+import org.drinkless.td.libcore.telegram.TdApi.BotCommands
 import org.drinkless.td.libcore.telegram.TdApi.CanTransferOwnershipResult
 import org.drinkless.td.libcore.telegram.TdApi.Chats
 import org.drinkless.td.libcore.telegram.TdApi.ConnectedWebsites
@@ -23,13 +26,20 @@ import org.drinkless.td.libcore.telegram.TdApi.DeepLinkInfo
 import org.drinkless.td.libcore.telegram.TdApi.DeviceToken
 import org.drinkless.td.libcore.telegram.TdApi.Error
 import org.drinkless.td.libcore.telegram.TdApi.FileType
+import org.drinkless.td.libcore.telegram.TdApi.FormattedText
 import org.drinkless.td.libcore.telegram.TdApi.Hashtags
+import org.drinkless.td.libcore.telegram.TdApi.HttpUrl
+import org.drinkless.td.libcore.telegram.TdApi.InternalLinkType
 import org.drinkless.td.libcore.telegram.TdApi.JsonValue
 import org.drinkless.td.libcore.telegram.TdApi.LocalizationTargetInfo
+import org.drinkless.td.libcore.telegram.TdApi.Location
+import org.drinkless.td.libcore.telegram.TdApi.LoginUrlInfo
 import org.drinkless.td.libcore.telegram.TdApi.OptionValue
 import org.drinkless.td.libcore.telegram.TdApi.Proxies
 import org.drinkless.td.libcore.telegram.TdApi.PushReceiverId
+import org.drinkless.td.libcore.telegram.TdApi.StatisticalGraph
 import org.drinkless.td.libcore.telegram.TdApi.StorageStatistics
+import org.drinkless.td.libcore.telegram.TdApi.SuggestedAction
 import org.drinkless.td.libcore.telegram.TdApi.TMeUrls
 import org.drinkless.td.libcore.telegram.TdApi.TdlibParameters
 import org.drinkless.td.libcore.telegram.TdApi.TestInt
@@ -58,9 +68,20 @@ suspend fun TelegramFlow.canTransferOwnership(): CanTransferOwnershipResult =
 /**
  * Suspend function, which closes the TDLib instance. All databases will be flushed to disk and
  * properly closed. After the close completes, updateAuthorizationState with authorizationStateClosed
- * will be sent.
+ * will be sent. Can be called before initialization.
  */
 suspend fun TelegramFlow.close() = this.sendFunctionLaunch(TdApi.Close())
+
+/**
+ * Suspend function, which deletes commands supported by the bot for the given user scope and
+ * language; for bots only.
+ *
+ * @param scope The scope to which the commands are relevant; pass null to delete commands in the
+ * default bot command scope.  
+ * @param languageCode A two-letter ISO 639-1 country code or an empty string.
+ */
+suspend fun TelegramFlow.deleteCommands(scope: BotCommandScope?, languageCode: String?) =
+    this.sendFunctionLaunch(TdApi.DeleteCommands(scope, languageCode))
 
 /**
  * Suspend function, which deletes saved credentials for all payment provider bots.
@@ -72,7 +93,7 @@ suspend fun TelegramFlow.deleteSavedCredentials() =
  * Suspend function, which closes the TDLib instance, destroying all local data without a proper
  * logout. The current user session will remain in the list of all active sessions. All local data will
  * be destroyed. After the destruction completes updateAuthorizationState with authorizationStateClosed
- * will be sent.
+ * will be sent. Can be called before authorization.
  */
 suspend fun TelegramFlow.destroy() = this.sendFunctionLaunch(TdApi.Destroy())
 
@@ -100,14 +121,46 @@ suspend fun TelegramFlow.getApplicationConfig(): JsonValue =
     this.sendFunctionAsync(TdApi.GetApplicationConfig())
 
 /**
+ * Suspend function, which returns the link for downloading official Telegram application to be used
+ * when the current user invites friends to Telegram.
+ *
+ * @return [HttpUrl] Contains an HTTP URL.
+ */
+suspend fun TelegramFlow.getApplicationDownloadLink(): HttpUrl =
+    this.sendFunctionAsync(TdApi.GetApplicationDownloadLink())
+
+/**
  * Suspend function, which returns the current authorization state; this is an offline request. For
  * informational purposes only. Use updateAuthorizationState instead to maintain the current
- * authorization state.
+ * authorization state. Can be called before initialization.
  *
  * @return [AuthorizationState] This class is an abstract base class.
  */
 suspend fun TelegramFlow.getAuthorizationState(): AuthorizationState =
     this.sendFunctionAsync(TdApi.GetAuthorizationState())
+
+/**
+ * Suspend function, which returns information about a bank card.
+ *
+ * @param bankCardNumber The bank card number.
+ *
+ * @return [BankCardInfo] Information about a bank card.
+ */
+suspend fun TelegramFlow.getBankCardInfo(bankCardNumber: String?): BankCardInfo =
+    this.sendFunctionAsync(TdApi.GetBankCardInfo(bankCardNumber))
+
+/**
+ * Suspend function, which returns the list of commands supported by the bot for the given user
+ * scope and language; for bots only.
+ *
+ * @param scope The scope to which the commands are relevant; pass null to get commands in the
+ * default bot command scope.  
+ * @param languageCode A two-letter ISO 639-1 country code or an empty string.
+ *
+ * @return [BotCommands] Contains a list of bot commands.
+ */
+suspend fun TelegramFlow.getCommands(scope: BotCommandScope?, languageCode: String?): BotCommands =
+    this.sendFunctionAsync(TdApi.GetCommands(scope, languageCode))
 
 /**
  * Suspend function, which returns all website where the current user used Telegram to log in.
@@ -121,7 +174,7 @@ suspend fun TelegramFlow.getConnectedWebsites(): ConnectedWebsites =
 /**
  * Suspend function, which returns all updates needed to restore current TDLib state, i.e. all
  * actual UpdateAuthorizationState/UpdateUser/UpdateNewChat and others. This is especially useful if
- * TDLib is run in a separate process. This is an offline method. Can be called before authorization.
+ * TDLib is run in a separate process. Can be called before initialization.
  *
  * @return [Updates] Contains a list of updates.
  */
@@ -135,10 +188,36 @@ suspend fun TelegramFlow.getCurrentState(): Updates =
  *
  * @param link The link.
  *
- * @return [DeepLinkInfo] Contains information about a tg:// deep link.
+ * @return [DeepLinkInfo] Contains information about a tg: deep link.
  */
 suspend fun TelegramFlow.getDeepLinkInfo(link: String?): DeepLinkInfo =
     this.sendFunctionAsync(TdApi.GetDeepLinkInfo(link))
+
+/**
+ * Suspend function, which returns an HTTP URL which can be used to automatically authorize the
+ * current user on a website after clicking an HTTP link. Use the method getExternalLinkInfo to find
+ * whether a prior user confirmation is needed.
+ *
+ * @param link The HTTP link.  
+ * @param allowWriteAccess True, if the current user allowed the bot, returned in
+ * getExternalLinkInfo, to send them messages.
+ *
+ * @return [HttpUrl] Contains an HTTP URL.
+ */
+suspend fun TelegramFlow.getExternalLink(link: String?, allowWriteAccess: Boolean): HttpUrl =
+    this.sendFunctionAsync(TdApi.GetExternalLink(link, allowWriteAccess))
+
+/**
+ * Suspend function, which returns information about an action to be done when the current user
+ * clicks an external link. Don't use this method for links from secret chats if web page preview is
+ * disabled in secret chats.
+ *
+ * @param link The link.
+ *
+ * @return [LoginUrlInfo] This class is an abstract base class.
+ */
+suspend fun TelegramFlow.getExternalLinkInfo(link: String?): LoginUrlInfo =
+    this.sendFunctionAsync(TdApi.GetExternalLinkInfo(link))
 
 /**
  * Suspend function, which returns a list of common group chats with a given user. Chats are sorted
@@ -152,22 +231,25 @@ suspend fun TelegramFlow.getDeepLinkInfo(link: String?): DeepLinkInfo =
  * @return [Chats] Represents a list of chats.
  */
 suspend fun TelegramFlow.getGroupsInCommon(
-  userId: Int,
+  userId: Long,
   offsetChatId: Long,
   limit: Int
 ): Chats = this.sendFunctionAsync(TdApi.GetGroupsInCommon(userId, offsetChatId, limit))
 
 /**
- * Suspend function, which returns the default text for invitation messages to be used as a
- * placeholder when the current user invites friends to Telegram.
+ * Suspend function, which returns information about the type of an internal link. Returns a 404
+ * error if the link is not internal. Can be called before authorization.
  *
- * @return [Text] Contains some text.
+ * @param link The link.
+ *
+ * @return [InternalLinkType] This class is an abstract base class.
  */
-suspend fun TelegramFlow.getInviteText(): Text = this.sendFunctionAsync(TdApi.GetInviteText())
+suspend fun TelegramFlow.getInternalLinkType(link: String?): InternalLinkType =
+    this.sendFunctionAsync(TdApi.GetInternalLinkType(link))
 
 /**
- * Suspend function, which converts a JsonValue object to corresponding JSON-serialized string. This
- * is an offline method. Can be called before authorization. Can be called synchronously.
+ * Suspend function, which converts a JsonValue object to corresponding JSON-serialized string. Can
+ * be called synchronously.
  *
  * @param jsonValue The JsonValue object.
  *
@@ -177,8 +259,8 @@ suspend fun TelegramFlow.getJsonString(jsonValue: JsonValue?): Text =
     this.sendFunctionAsync(TdApi.GetJsonString(jsonValue))
 
 /**
- * Suspend function, which converts a JSON-serialized string to corresponding JsonValue object. This
- * is an offline method. Can be called before authorization. Can be called synchronously.
+ * Suspend function, which converts a JSON-serialized string to corresponding JsonValue object. Can
+ * be called synchronously.
  *
  * @param json The JSON-serialized string.
  *
@@ -198,6 +280,18 @@ suspend fun TelegramFlow.getJsonValue(json: String?): JsonValue =
  */
 suspend fun TelegramFlow.getLocalizationTargetInfo(onlyLocal: Boolean): LocalizationTargetInfo =
     this.sendFunctionAsync(TdApi.GetLocalizationTargetInfo(onlyLocal))
+
+/**
+ * Suspend function, which replaces text entities with Markdown formatting in a human-friendly
+ * format. Entities that can't be represented in Markdown unambiguously are kept as is. Can be called
+ * synchronously.
+ *
+ * @param text The text.
+ *
+ * @return [FormattedText] A text with some entities.
+ */
+suspend fun TelegramFlow.getMarkdownText(text: FormattedText?): FormattedText =
+    this.sendFunctionAsync(TdApi.GetMarkdownText(text))
 
 /**
  * Suspend function, which returns the current user.
@@ -227,8 +321,7 @@ suspend fun TelegramFlow.getProxies(): Proxies = this.sendFunctionAsync(TdApi.Ge
 
 /**
  * Suspend function, which returns a globally unique push notification subscription identifier for
- * identification of an account, which has received a push notification. This is an offline method. Can
- * be called before authorization. Can be called synchronously.
+ * identification of an account, which has received a push notification. Can be called synchronously.
  *
  * @param payload JSON-encoded push notification payload.
  *
@@ -258,6 +351,29 @@ suspend fun TelegramFlow.getRecentlyVisitedTMeUrls(referrer: String?): TMeUrls =
     this.sendFunctionAsync(TdApi.GetRecentlyVisitedTMeUrls(referrer))
 
 /**
+ * Suspend function, which loads an asynchronous or a zoomed in statistical graph.
+ *
+ * @param chatId Chat identifier.  
+ * @param token The token for graph loading.  
+ * @param x X-value for zoomed in graph or 0 otherwise.
+ *
+ * @return [StatisticalGraph] This class is an abstract base class.
+ */
+suspend fun TelegramFlow.getStatisticalGraph(
+  chatId: Long,
+  token: String?,
+  x: Long
+): StatisticalGraph = this.sendFunctionAsync(TdApi.GetStatisticalGraph(chatId, token, x))
+
+/**
+ * Suspend function, which hides a suggested action.
+ *
+ * @param action Suggested action to hide.
+ */
+suspend fun TelegramFlow.hideSuggestedAction(action: SuggestedAction?) =
+    this.sendFunctionLaunch(TdApi.HideSuggestedAction(action))
+
+/**
  * Suspend function, which closes the TDLib instance after a proper logout. Requires an available
  * network connection. All local data will be destroyed. After the logout completes,
  * updateAuthorizationState with authorizationStateClosed will be sent.
@@ -268,19 +384,22 @@ suspend fun TelegramFlow.logOut() = this.sendFunctionLaunch(TdApi.LogOut())
  * Suspend function, which optimizes storage usage, i.e. deletes some files and returns new storage
  * usage statistics. Secret thumbnails can't be deleted.
  *
- * @param size Limit on the total size of files after deletion. Pass -1 to use the default limit.  
+ * @param size Limit on the total size of files after deletion, in bytes. Pass -1 to use the default
+ * limit.  
  * @param ttl Limit on the time that has passed since the last time a file was accessed (or creation
  * time for some filesystems). Pass -1 to use the default limit.  
  * @param count Limit on the total count of files after deletion. Pass -1 to use the default limit. 
  * 
  * @param immunityDelay The amount of time after the creation of a file during which it can't be
  * deleted, in seconds. Pass -1 to use the default value.  
- * @param fileTypes If not empty, only files with the given type(s) are considered. By default, all
+ * @param fileTypes If non-empty, only files with the given types are considered. By default, all
  * types except thumbnails, profile photos, stickers and wallpapers are deleted.  
- * @param chatIds If not empty, only files from the given chats are considered. Use 0 as chat
+ * @param chatIds If non-empty, only files from the given chats are considered. Use 0 as chat
  * identifier to delete files not belonging to any chat (e.g., profile photos).  
- * @param excludeChatIds If not empty, files from the given chats are excluded. Use 0 as chat
+ * @param excludeChatIds If non-empty, files from the given chats are excluded. Use 0 as chat
  * identifier to exclude all files not belonging to any chat (e.g., profile photos).  
+ * @param returnDeletedFileStatistics Pass true if statistics about the files that were deleted must
+ * be returned instead of the whole storage usage statistics. Affects only returned statistics.  
  * @param chatLimit Same as in getStorageStatistics. Affects only returned statistics.
  *
  * @return [StorageStatistics] Contains the exact storage usage statistics split by chats and file
@@ -294,21 +413,34 @@ suspend fun TelegramFlow.optimizeStorage(
   fileTypes: Array<FileType>?,
   chatIds: LongArray?,
   excludeChatIds: LongArray?,
+  returnDeletedFileStatistics: Boolean,
   chatLimit: Int
 ): StorageStatistics = this.sendFunctionAsync(TdApi.OptimizeStorage(size, ttl, count, immunityDelay,
-    fileTypes, chatIds, excludeChatIds, chatLimit))
+    fileTypes, chatIds, excludeChatIds, returnDeletedFileStatistics, chatLimit))
+
+/**
+ * Suspend function, which parses Markdown entities in a human-friendly format, ignoring markup
+ * errors. Can be called synchronously.
+ *
+ * @param text The text to parse. For example, &quot;__italic__ ~~strikethrough~~ **bold** `code`
+ * ```pre``` __[italic__ textUrl](telegram.org) _Italic**bold italic_Bold**&quot;.
+ *
+ * @return [FormattedText] A text with some entities.
+ */
+suspend fun TelegramFlow.parseMarkdown(text: FormattedText?): FormattedText =
+    this.sendFunctionAsync(TdApi.ParseMarkdown(text))
 
 /**
  * Suspend function, which registers the currently used device for receiving push notifications.
  * Returns a globally unique identifier of the push notification subscription.
  *
  * @param deviceToken Device token.  
- * @param otherUserIds List of user identifiers of other users currently using the client.
+ * @param otherUserIds List of user identifiers of other users currently using the application.
  *
  * @return [PushReceiverId] Contains a globally unique push receiver identifier, which can be used
  * to identify which account has received a push notification.
  */
-suspend fun TelegramFlow.registerDevice(deviceToken: DeviceToken?, otherUserIds: IntArray?):
+suspend fun TelegramFlow.registerDevice(deviceToken: DeviceToken?, otherUserIds: LongArray?):
     PushReceiverId = this.sendFunctionAsync(TdApi.RegisterDevice(deviceToken, otherUserIds))
 
 /**
@@ -343,7 +475,7 @@ suspend fun TelegramFlow.sendCustomRequest(method: String?, parameters: String?)
 
 /**
  * Suspend function, which succeeds after a specified amount of time has passed. Can be called
- * before authorization. Can be called before initialization.
+ * before initialization.
  *
  * @param seconds Number of seconds before the function returns.
  */
@@ -358,11 +490,35 @@ suspend fun TelegramFlow.setAlarm(seconds: Double) =
 suspend fun TelegramFlow.setBio(bio: String?) = this.sendFunctionLaunch(TdApi.SetBio(bio))
 
 /**
- * Suspend function, which changes the first and last name of the current user. If something
- * changes, updateUser will be sent.
+ * Suspend function, which sets the list of commands supported by the bot for the given user scope
+ * and language; for bots only.
  *
- * @param firstName The new value of the first name for the user; 1-64 characters.  
- * @param lastName The new value of the optional last name for the user; 0-64 characters.
+ * @param scope The scope to which the commands are relevant; pass null to change commands in the
+ * default bot command scope.  
+ * @param languageCode A two-letter ISO 639-1 country code. If empty, the commands will be applied
+ * to all users from the given scope, for which language there are no dedicated commands.  
+ * @param commands List of the bot's commands.
+ */
+suspend fun TelegramFlow.setCommands(
+  scope: BotCommandScope?,
+  languageCode: String?,
+  commands: Array<BotCommand>?
+) = this.sendFunctionLaunch(TdApi.SetCommands(scope, languageCode, commands))
+
+/**
+ * Suspend function, which changes the location of the current user. Needs to be called if
+ * GetOption(&quot;is_location_visible&quot;) is true and location changes for more than 1 kilometer.
+ *
+ * @param location The new location of the user.
+ */
+suspend fun TelegramFlow.setLocation(location: Location?) =
+    this.sendFunctionLaunch(TdApi.SetLocation(location))
+
+/**
+ * Suspend function, which changes the first and last name of the current user.
+ *
+ * @param firstName The new value of the first name for the current user; 1-64 characters.  
+ * @param lastName The new value of the optional last name for the current user; 0-64 characters.
  */
 suspend fun TelegramFlow.setName(firstName: String?, lastName: String?) =
     this.sendFunctionLaunch(TdApi.SetName(firstName, lastName))
@@ -373,7 +529,7 @@ suspend fun TelegramFlow.setName(firstName: String?, lastName: String?) =
  * authorization.
  *
  * @param name The name of the option.  
- * @param value The new value of the option.
+ * @param value The new value of the option; pass null to reset option value to a default value.
  */
 suspend fun TelegramFlow.setOption(name: String?, value: OptionValue?) =
     this.sendFunctionLaunch(TdApi.SetOption(name, value))
@@ -382,7 +538,7 @@ suspend fun TelegramFlow.setOption(name: String?, value: OptionValue?) =
  * Suspend function, which sets the parameters for TDLib initialization. Works only when the current
  * authorization state is authorizationStateWaitTdlibParameters.
  *
- * @param parameters Parameters.
+ * @param parameters Parameters for TDLib initialization.
  */
 suspend fun TelegramFlow.setTdlibParameters(parameters: TdlibParameters?) =
     this.sendFunctionLaunch(TdApi.SetTdlibParameters(parameters))
@@ -395,8 +551,7 @@ suspend fun TelegramFlow.testGetDifference() = this.sendFunctionLaunch(TdApi.Tes
 
 /**
  * Suspend function, which returns the specified error and ensures that the Error object is used;
- * for testing only. This is an offline method. Can be called before authorization. Can be called
- * synchronously.
+ * for testing only. Can be called synchronously.
  *
  * @param error The error to be returned.
  *

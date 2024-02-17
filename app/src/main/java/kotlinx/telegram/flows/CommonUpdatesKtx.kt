@@ -4,7 +4,7 @@
 //
 package kotlinx.telegram.flows
 
-import kotlin.IntArray
+import kotlin.Array
 import kotlin.String
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
@@ -20,6 +20,7 @@ import org.drinkless.td.libcore.telegram.TdApi.UpdateNewPreCheckoutQuery
 import org.drinkless.td.libcore.telegram.TdApi.UpdateNewShippingQuery
 import org.drinkless.td.libcore.telegram.TdApi.UpdateOption
 import org.drinkless.td.libcore.telegram.TdApi.UpdateSelectedBackground
+import org.drinkless.td.libcore.telegram.TdApi.UpdateSuggestedActions
 import org.drinkless.td.libcore.telegram.TdApi.UpdateTermsOfService
 
 /**
@@ -35,13 +36,6 @@ fun TelegramFlow.authorizationStateFlow(): Flow<AuthorizationState> =
 fun TelegramFlow.optionFlow(): Flow<UpdateOption> = this.getUpdatesFlowOfType()
 
 /**
- * emits animationIds [Int[]] if the list of saved animations was updated.
- */
-fun TelegramFlow.savedAnimationsFlow(): Flow<IntArray> =
-    this.getUpdatesFlowOfType<TdApi.UpdateSavedAnimations>()
-    .mapNotNull { it.animationIds }
-
-/**
  * emits [UpdateSelectedBackground] if the selected background has changed.
  */
 fun TelegramFlow.selectedBackgroundFlow(): Flow<UpdateSelectedBackground> =
@@ -54,7 +48,8 @@ fun TelegramFlow.languagePackStringsFlow(): Flow<UpdateLanguagePackStrings> =
     this.getUpdatesFlowOfType()
 
 /**
- * emits state [ConnectionState] if the connection state has changed.
+ * emits state [ConnectionState] if the connection state has changed. This update must be used only
+ * to show a human-readable description of the connection state.
  */
 fun TelegramFlow.connectionStateFlow(): Flow<ConnectionState> =
     this.getUpdatesFlowOfType<TdApi.UpdateConnectionState>()
@@ -62,10 +57,22 @@ fun TelegramFlow.connectionStateFlow(): Flow<ConnectionState> =
 
 /**
  * emits [UpdateTermsOfService] if new terms of service must be accepted by the user. If the terms
- * of service are declined, then the deleteAccount method should be called with the reason
- * &quot;Decline ToS update&quot;.
+ * of service are declined, then the deleteAccount method must be called with the reason &quot;Decline
+ * ToS update&quot;.
  */
 fun TelegramFlow.termsOfServiceFlow(): Flow<UpdateTermsOfService> = this.getUpdatesFlowOfType()
+
+/**
+ * emits emojis [String[]] if the list of supported dice emojis has changed.
+ */
+fun TelegramFlow.diceEmojisFlow(): Flow<Array<String>> =
+    this.getUpdatesFlowOfType<TdApi.UpdateDiceEmojis>()
+    .mapNotNull { it.emojis }
+
+/**
+ * emits [UpdateSuggestedActions] if the list of suggested to the user actions has changed.
+ */
+fun TelegramFlow.suggestedActionsFlow(): Flow<UpdateSuggestedActions> = this.getUpdatesFlowOfType()
 
 /**
  * emits [UpdateNewInlineQuery] if a new incoming inline query; for bots only.

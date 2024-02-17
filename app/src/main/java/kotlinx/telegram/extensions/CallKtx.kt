@@ -6,6 +6,7 @@ package kotlinx.telegram.extensions
 
 import kotlin.Array
 import kotlin.Boolean
+import kotlin.ByteArray
 import kotlin.Int
 import kotlin.Long
 import kotlin.String
@@ -14,6 +15,7 @@ import kotlinx.telegram.coroutines.acceptCall
 import kotlinx.telegram.coroutines.discardCall
 import kotlinx.telegram.coroutines.sendCallDebugInformation
 import kotlinx.telegram.coroutines.sendCallRating
+import kotlinx.telegram.coroutines.sendCallSignalingData
 import org.drinkless.td.libcore.telegram.TdApi
 import org.drinkless.td.libcore.telegram.TdApi.Call
 import org.drinkless.td.libcore.telegram.TdApi.CallProblem
@@ -32,7 +34,7 @@ interface CallKtx : BaseKtx {
   /**
    * Suspend function, which accepts an incoming call.
    *
-   * @param protocol Description of the call protocols supported by the client.
+   * @param protocol The call protocols supported by the application.
    */
   suspend fun Call.accept(protocol: CallProtocol?) = api.acceptCall(this.id, protocol)
 
@@ -41,13 +43,15 @@ interface CallKtx : BaseKtx {
    *
    * @param isDisconnected True, if the user was disconnected.  
    * @param duration The call duration, in seconds.  
+   * @param isVideo True, if the call was a video call.  
    * @param connectionId Identifier of the connection used during the call.
    */
   suspend fun Call.discard(
     isDisconnected: Boolean,
     duration: Int,
+    isVideo: Boolean,
     connectionId: Long
-  ) = api.discardCall(this.id, isDisconnected, duration, connectionId)
+  ) = api.discardCall(this.id, isDisconnected, duration, isVideo, connectionId)
 
   /**
    * Suspend function, which sends debug information for a call.
@@ -69,4 +73,11 @@ interface CallKtx : BaseKtx {
     comment: String?,
     problems: Array<CallProblem>?
   ) = api.sendCallRating(this.id, rating, comment, problems)
+
+  /**
+   * Suspend function, which sends call signaling data.
+   *
+   * @param data The data.
+   */
+  suspend fun Call.sendSignalingData(data: ByteArray?) = api.sendCallSignalingData(this.id, data)
 }

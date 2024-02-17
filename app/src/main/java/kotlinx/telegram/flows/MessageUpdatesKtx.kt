@@ -9,16 +9,18 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
 import org.drinkless.td.libcore.telegram.TdApi.Message
+import org.drinkless.td.libcore.telegram.TdApi.UpdateAnimatedEmojiMessageClicked
 import org.drinkless.td.libcore.telegram.TdApi.UpdateDeleteMessages
 import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageContent
 import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageContentOpened
 import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageEdited
+import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageInteractionInfo
+import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageIsPinned
 import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageLiveLocationViewed
 import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageMentionRead
 import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageSendAcknowledged
 import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageSendFailed
 import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageSendSucceeded
-import org.drinkless.td.libcore.telegram.TdApi.UpdateMessageViews
 import org.drinkless.td.libcore.telegram.TdApi.UpdateUnreadMessageCount
 
 /**
@@ -63,9 +65,16 @@ fun TelegramFlow.messageContentFlow(): Flow<UpdateMessageContent> = this.getUpda
 fun TelegramFlow.messageEditedFlow(): Flow<UpdateMessageEdited> = this.getUpdatesFlowOfType()
 
 /**
- * emits [UpdateMessageViews] if the view count of the message has changed.
+ * emits [UpdateMessageIsPinned] if the message pinned state was changed.
  */
-fun TelegramFlow.messageViewsFlow(): Flow<UpdateMessageViews> = this.getUpdatesFlowOfType()
+fun TelegramFlow.messageIsPinnedFlow(): Flow<UpdateMessageIsPinned> = this.getUpdatesFlowOfType()
+
+/**
+ * emits [UpdateMessageInteractionInfo] if the information about interactions with a message has
+ * changed.
+ */
+fun TelegramFlow.messageInteractionInfoFlow(): Flow<UpdateMessageInteractionInfo> =
+    this.getUpdatesFlowOfType()
 
 /**
  * emits [UpdateMessageContentOpened] if the message content was opened. Updates voice note messages
@@ -83,7 +92,7 @@ fun TelegramFlow.messageMentionReadFlow(): Flow<UpdateMessageMentionRead> =
 
 /**
  * emits [UpdateMessageLiveLocationViewed] if a message with a live location was viewed. When the
- * update is received, the client is supposed to update the live location.
+ * update is received, the application is supposed to update the live location.
  */
 fun TelegramFlow.messageLiveLocationViewedFlow(): Flow<UpdateMessageLiveLocationViewed> =
     this.getUpdatesFlowOfType()
@@ -98,4 +107,12 @@ fun TelegramFlow.deleteMessagesFlow(): Flow<UpdateDeleteMessages> = this.getUpda
  * update is sent only if the message database is used.
  */
 fun TelegramFlow.unreadMessageCountFlow(): Flow<UpdateUnreadMessageCount> =
+    this.getUpdatesFlowOfType()
+
+/**
+ * emits [UpdateAnimatedEmojiMessageClicked] if some animated emoji message was clicked and a big
+ * animated sticker must be played if the message is visible on the screen.
+ * chatActionWatchingAnimations with the text of the message needs to be sent if the sticker is played.
+ */
+fun TelegramFlow.animatedEmojiMessageClickedFlow(): Flow<UpdateAnimatedEmojiMessageClicked> =
     this.getUpdatesFlowOfType()

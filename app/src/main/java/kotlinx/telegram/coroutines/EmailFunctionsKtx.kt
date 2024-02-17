@@ -14,7 +14,7 @@ import org.drinkless.td.libcore.telegram.TdApi.RecoveryEmailAddress
 /**
  * Suspend function, which checks the email address verification code for Telegram Passport.
  *
- * @param code Verification code.
+ * @param code Verification code to check.
  */
 suspend fun TelegramFlow.checkEmailAddressVerificationCode(code: String?) =
     this.sendFunctionLaunch(TdApi.CheckEmailAddressVerificationCode(code))
@@ -22,7 +22,7 @@ suspend fun TelegramFlow.checkEmailAddressVerificationCode(code: String?) =
 /**
  * Suspend function, which checks the 2-step verification recovery email address verification code.
  *
- * @param code Verification code.
+ * @param code Verification code to check.
  *
  * @return [PasswordState] Represents the current state of 2-step verification.
  */

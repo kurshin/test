@@ -4,6 +4,7 @@
 //
 package kotlinx.telegram.coroutines
 
+import kotlin.Int
 import kotlin.Long
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
@@ -16,6 +17,16 @@ import org.drinkless.td.libcore.telegram.TdApi.Sessions
  */
 suspend fun TelegramFlow.getActiveSessions(): Sessions =
     this.sendFunctionAsync(TdApi.GetActiveSessions())
+
+/**
+ * Suspend function, which changes the period of inactivity after which sessions will automatically
+ * be terminated.
+ *
+ * @param inactiveSessionTtlDays New number of days of inactivity before sessions will be
+ * automatically terminated; 1-366 days.
+ */
+suspend fun TelegramFlow.setInactiveSessionTtl(inactiveSessionTtlDays: Int) =
+    this.sendFunctionLaunch(TdApi.SetInactiveSessionTtl(inactiveSessionTtlDays))
 
 /**
  * Suspend function, which terminates all other sessions of the current user.

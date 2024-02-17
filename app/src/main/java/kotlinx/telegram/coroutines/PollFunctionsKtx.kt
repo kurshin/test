@@ -14,15 +14,15 @@ import org.drinkless.td.libcore.telegram.TdApi.Users
 
 /**
  * Suspend function, which returns users voted for the specified option in a non-anonymous polls.
- * For the optimal performance the number of returned users is chosen by the library.
+ * For optimal performance, the number of returned users is chosen by TDLib.
  *
  * @param chatId Identifier of the chat to which the poll belongs.  
  * @param messageId Identifier of the message containing the poll.  
  * @param optionId 0-based identifier of the answer option.  
  * @param offset Number of users to skip in the result; must be non-negative.  
  * @param limit The maximum number of users to be returned; must be positive and can't be greater
- * than 50. Fewer users may be returned than specified by the limit, even if the end of the voter list
- * has not been reached.
+ * than 50. For optimal performance, the number of returned users is chosen by TDLib and can be smaller
+ * than the specified limit, even if the end of the voter list has not been reached.
  *
  * @return [Users] Represents a list of users.
  */
@@ -55,7 +55,7 @@ suspend fun TelegramFlow.setPollAnswer(
  *
  * @param chatId Identifier of the chat to which the poll belongs.  
  * @param messageId Identifier of the message containing the poll.  
- * @param replyMarkup The new message reply markup; for bots only.
+ * @param replyMarkup The new message reply markup; pass null if none; for bots only.
  */
 suspend fun TelegramFlow.stopPoll(
   chatId: Long,

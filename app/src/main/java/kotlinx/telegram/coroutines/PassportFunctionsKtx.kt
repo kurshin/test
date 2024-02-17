@@ -6,6 +6,7 @@ package kotlinx.telegram.coroutines
 
 import kotlin.Array
 import kotlin.Int
+import kotlin.Long
 import kotlin.String
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
@@ -41,14 +42,14 @@ suspend fun TelegramFlow.getAllPassportElements(password: String?): PassportElem
  *
  * @param botUserId User identifier of the service's bot.  
  * @param scope Telegram Passport element types requested by the service.  
- * @param publicKey Service's publicKey.  
- * @param nonce Authorization form nonce provided by the service.
+ * @param publicKey Service's public key.  
+ * @param nonce Unique request identifier provided by the service.
  *
  * @return [PassportAuthorizationForm] Contains information about a Telegram Passport authorization
  * form that was requested.
  */
 suspend fun TelegramFlow.getPassportAuthorizationForm(
-  botUserId: Int,
+  botUserId: Long,
   scope: String?,
   publicKey: String?,
   nonce: String?
@@ -85,7 +86,7 @@ suspend fun TelegramFlow.getPassportElement(type: PassportElementType?, password
 /**
  * Suspend function, which sends a Telegram Passport authorization form, effectively sharing data
  * with the service. This method must be called after getPassportAuthorizationFormAvailableElements if
- * some previously available elements need to be used.
+ * some previously available elements are going to be reused.
  *
  * @param autorizationFormId Authorization form identifier.  
  * @param types Types of Telegram Passport elements chosen by user to complete the authorization
@@ -116,6 +117,6 @@ suspend fun TelegramFlow.setPassportElement(element: InputPassportElement?, pass
  * @param userId User identifier.  
  * @param errors The errors.
  */
-suspend fun TelegramFlow.setPassportElementErrors(userId: Int,
+suspend fun TelegramFlow.setPassportElementErrors(userId: Long,
     errors: Array<InputPassportElementError>?) =
     this.sendFunctionLaunch(TdApi.SetPassportElementErrors(userId, errors))

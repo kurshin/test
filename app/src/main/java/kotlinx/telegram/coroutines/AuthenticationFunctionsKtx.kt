@@ -4,7 +4,7 @@
 //
 package kotlinx.telegram.coroutines
 
-import kotlin.IntArray
+import kotlin.LongArray
 import kotlin.String
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
@@ -24,7 +24,7 @@ suspend fun TelegramFlow.checkAuthenticationBotToken(token: String?) =
  * Suspend function, which checks the authentication code. Works only when the current authorization
  * state is authorizationStateWaitCode.
  *
- * @param code The verification code received via SMS, Telegram message, phone call, or flash call.
+ * @param code Authentication code to check.
  */
 suspend fun TelegramFlow.checkAuthenticationCode(code: String?) =
     this.sendFunctionLaunch(TdApi.CheckAuthenticationCode(code))
@@ -36,23 +36,26 @@ suspend fun TelegramFlow.checkAuthenticationCode(code: String?) =
  * @param link A link from a QR code. The link must be scanned by the in-app camera.
  *
  * @return [Session] Contains information about one session in a Telegram application used by the
- * current user. Sessions should be shown to the user in the returned order.
+ * current user. Sessions must be shown to the user in the returned order.
  */
 suspend fun TelegramFlow.confirmQrCodeAuthentication(link: String?): Session =
     this.sendFunctionAsync(TdApi.ConfirmQrCodeAuthentication(link))
 
 /**
  * Suspend function, which requests QR code authentication by scanning a QR code on another logged
- * in device. Works only when the current authorization state is authorizationStateWaitPhoneNumber.
+ * in device. Works only when the current authorization state is authorizationStateWaitPhoneNumber, or
+ * if there is no pending authentication query and the current authorization state is
+ * authorizationStateWaitCode, authorizationStateWaitRegistration, or authorizationStateWaitPassword.
  *
- * @param otherUserIds List of user identifiers of other users currently using the client.
+ * @param otherUserIds List of user identifiers of other users currently using the application.
  */
-suspend fun TelegramFlow.requestQrCodeAuthentication(otherUserIds: IntArray?) =
+suspend fun TelegramFlow.requestQrCodeAuthentication(otherUserIds: LongArray?) =
     this.sendFunctionLaunch(TdApi.RequestQrCodeAuthentication(otherUserIds))
 
 /**
  * Suspend function, which re-sends an authentication code to the user. Works only when the current
- * authorization state is authorizationStateWaitCode and the nextCodeType of the result is not null.
+ * authorization state is authorizationStateWaitCode, the nextCodeType of the result is not null and
+ * the server-specified timeout has passed.
  */
 suspend fun TelegramFlow.resendAuthenticationCode() =
     this.sendFunctionLaunch(TdApi.ResendAuthenticationCode())

@@ -6,8 +6,8 @@ package kotlinx.telegram.coroutines
 
 import kotlin.Boolean
 import kotlin.Int
-import kotlin.IntArray
 import kotlin.Long
+import kotlin.LongArray
 import kotlin.String
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
@@ -21,10 +21,9 @@ import org.drinkless.td.libcore.telegram.TdApi.LogVerbosityLevel
 import org.drinkless.td.libcore.telegram.TdApi.LoginUrlInfo
 
 /**
- * Suspend function, which adds a message to TDLib internal log. This is an offline method. Can be
- * called before authorization. Can be called synchronously.
+ * Suspend function, which adds a message to TDLib internal log. Can be called synchronously.
  *
- * @param verbosityLevel The minimum verbosity level needed for the message to be logged, 0-1023.  
+ * @param verbosityLevel The minimum verbosity level needed for the message to be logged; 0-1023.  
  * @param text Text of a message to log.
  */
 suspend fun TelegramFlow.addLogMessage(verbosityLevel: Int, text: String?) =
@@ -41,7 +40,7 @@ suspend fun TelegramFlow.addLogMessage(verbosityLevel: Int, text: String?) =
  * @param fromEventId Identifier of an event from which to return results. Use 0 to get results from
  * the latest events.  
  * @param limit The maximum number of events to return; up to 100.  
- * @param filters The types of events to return. By default, all types will be returned.  
+ * @param filters The types of events to return; pass null to get chat events of all types.  
  * @param userIds User identifiers by which to filter events. By default, events relating to all
  * users will be returned.
  *
@@ -53,14 +52,13 @@ suspend fun TelegramFlow.getChatEventLog(
   fromEventId: Long,
   limit: Int,
   filters: ChatEventLogFilters?,
-  userIds: IntArray?
+  userIds: LongArray?
 ): ChatEvents = this.sendFunctionAsync(TdApi.GetChatEventLog(chatId, query, fromEventId, limit,
     filters, userIds))
 
 /**
  * Suspend function, which returns information about currently used log stream for internal logging
- * of TDLib. This is an offline method. Can be called before authorization. Can be called
- * synchronously.
+ * of TDLib. Can be called synchronously.
  *
  * @return [LogStream] This class is an abstract base class.
  */
@@ -68,7 +66,7 @@ suspend fun TelegramFlow.getLogStream(): LogStream = this.sendFunctionAsync(TdAp
 
 /**
  * Suspend function, which returns current verbosity level for a specified TDLib internal log tag.
- * This is an offline method. Can be called before authorization. Can be called synchronously.
+ * Can be called synchronously.
  *
  * @param tag Logging tag to change verbosity level.
  *
@@ -80,16 +78,15 @@ suspend fun TelegramFlow.getLogTagVerbosityLevel(tag: String?): LogVerbosityLeve
 /**
  * Suspend function, which returns list of available TDLib internal log tags, for example,
  * [&quot;actor&quot;, &quot;binlog&quot;, &quot;connections&quot;, &quot;notifications&quot;,
- * &quot;proxy&quot;]. This is an offline method. Can be called before authorization. Can be called
- * synchronously.
+ * &quot;proxy&quot;]. Can be called synchronously.
  *
  * @return [LogTags] Contains a list of available TDLib internal log tags.
  */
 suspend fun TelegramFlow.getLogTags(): LogTags = this.sendFunctionAsync(TdApi.GetLogTags())
 
 /**
- * Suspend function, which returns current verbosity level of the internal logging of TDLib. This is
- * an offline method. Can be called before authorization. Can be called synchronously.
+ * Suspend function, which returns current verbosity level of the internal logging of TDLib. Can be
+ * called synchronously.
  *
  * @return [LogVerbosityLevel] Contains a TDLib internal log verbosity level.
  */
@@ -112,7 +109,7 @@ suspend fun TelegramFlow.getLogVerbosityLevel(): LogVerbosityLevel =
 suspend fun TelegramFlow.getLoginUrl(
   chatId: Long,
   messageId: Long,
-  buttonId: Int,
+  buttonId: Long,
   allowWriteAccess: Boolean
 ): HttpUrl = this.sendFunctionAsync(TdApi.GetLoginUrl(chatId, messageId, buttonId,
     allowWriteAccess))
@@ -130,7 +127,7 @@ suspend fun TelegramFlow.getLoginUrl(
 suspend fun TelegramFlow.getLoginUrlInfo(
   chatId: Long,
   messageId: Long,
-  buttonId: Int
+  buttonId: Long
 ): LoginUrlInfo = this.sendFunctionAsync(TdApi.GetLoginUrlInfo(chatId, messageId, buttonId))
 
 /**
@@ -148,8 +145,8 @@ suspend fun TelegramFlow.saveApplicationLogEvent(
 ) = this.sendFunctionLaunch(TdApi.SaveApplicationLogEvent(type, chatId, data))
 
 /**
- * Suspend function, which sets new log stream for internal logging of TDLib. This is an offline
- * method. Can be called before authorization. Can be called synchronously.
+ * Suspend function, which sets new log stream for internal logging of TDLib. Can be called
+ * synchronously.
  *
  * @param logStream New log stream.
  */
@@ -157,8 +154,8 @@ suspend fun TelegramFlow.setLogStream(logStream: LogStream?) =
     this.sendFunctionLaunch(TdApi.SetLogStream(logStream))
 
 /**
- * Suspend function, which sets the verbosity level for a specified TDLib internal log tag. This is
- * an offline method. Can be called before authorization. Can be called synchronously.
+ * Suspend function, which sets the verbosity level for a specified TDLib internal log tag. Can be
+ * called synchronously.
  *
  * @param tag Logging tag to change verbosity level.  
  * @param newVerbosityLevel New verbosity level; 1-1024.
@@ -167,8 +164,8 @@ suspend fun TelegramFlow.setLogTagVerbosityLevel(tag: String?, newVerbosityLevel
     this.sendFunctionLaunch(TdApi.SetLogTagVerbosityLevel(tag, newVerbosityLevel))
 
 /**
- * Suspend function, which sets the verbosity level of the internal logging of TDLib. This is an
- * offline method. Can be called before authorization. Can be called synchronously.
+ * Suspend function, which sets the verbosity level of the internal logging of TDLib. Can be called
+ * synchronously.
  *
  * @param newVerbosityLevel New value of the verbosity level for logging. Value 0 corresponds to
  * fatal errors, value 1 corresponds to errors, value 2 corresponds to warnings and debug warnings,

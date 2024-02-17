@@ -10,10 +10,10 @@ import kotlin.Int
 import kotlin.String
 import kotlinx.telegram.core.TelegramFlow
 import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.td.libcore.telegram.TdApi.HttpUrl
 import org.drinkless.td.libcore.telegram.TdApi.Proxy
 import org.drinkless.td.libcore.telegram.TdApi.ProxyType
 import org.drinkless.td.libcore.telegram.TdApi.Seconds
-import org.drinkless.td.libcore.telegram.TdApi.Text
 
 /**
  * Suspend function, which adds a proxy server for network requests. Can be called before
@@ -21,7 +21,7 @@ import org.drinkless.td.libcore.telegram.TdApi.Text
  *
  * @param server Proxy server IP address.  
  * @param port Proxy server port.  
- * @param enable True, if the proxy should be enabled.  
+ * @param enable True, if the proxy needs to be enabled.  
  * @param type Proxy type.
  *
  * @return [Proxy] Contains information about a proxy server.
@@ -45,7 +45,7 @@ suspend fun TelegramFlow.disableProxy() = this.sendFunctionLaunch(TdApi.DisableP
  * @param proxyId Proxy identifier.  
  * @param server Proxy server IP address.  
  * @param port Proxy server port.  
- * @param enable True, if the proxy should be enabled.  
+ * @param enable True, if the proxy needs to be enabled.  
  * @param type Proxy type.
  *
  * @return [Proxy] Contains information about a proxy server.
@@ -73,9 +73,9 @@ suspend fun TelegramFlow.enableProxy(proxyId: Int) =
  *
  * @param proxyId Proxy identifier.
  *
- * @return [Text] Contains some text.
+ * @return [HttpUrl] Contains an HTTP URL.
  */
-suspend fun TelegramFlow.getProxyLink(proxyId: Int): Text =
+suspend fun TelegramFlow.getProxyLink(proxyId: Int): HttpUrl =
     this.sendFunctionAsync(TdApi.GetProxyLink(proxyId))
 
 /**

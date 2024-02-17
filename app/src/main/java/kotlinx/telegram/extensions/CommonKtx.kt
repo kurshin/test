@@ -14,15 +14,14 @@ import kotlinx.telegram.coroutines.removeBackground
 import kotlinx.telegram.coroutines.removeNotification
 import kotlinx.telegram.coroutines.sendPaymentForm
 import kotlinx.telegram.coroutines.setSupergroupStickerSet
-import kotlinx.telegram.coroutines.terminateSession
 import org.drinkless.td.libcore.telegram.TdApi
 import org.drinkless.td.libcore.telegram.TdApi.Background
 import org.drinkless.td.libcore.telegram.TdApi.FileType
 import org.drinkless.td.libcore.telegram.TdApi.InputCredentials
 import org.drinkless.td.libcore.telegram.TdApi.Notification
+import org.drinkless.td.libcore.telegram.TdApi.PaymentForm
 import org.drinkless.td.libcore.telegram.TdApi.ProfilePhoto
 import org.drinkless.td.libcore.telegram.TdApi.RemoteFile
-import org.drinkless.td.libcore.telegram.TdApi.Session
 import org.drinkless.td.libcore.telegram.TdApi.ShippingOption
 import org.drinkless.td.libcore.telegram.TdApi.StickerSet
 
@@ -51,7 +50,29 @@ interface CommonKtx : BaseKtx {
       api.removeNotification(notificationGroupId, this.id)
 
   /**
-   * Suspend function, which deletes a profile photo. If something changes, updateUser will be sent.
+   * Suspend function, which sends a filled-out payment form to the bot for final verification.
+   *
+   * @param chatId Chat identifier of the Invoice message.  
+   * @param messageId Message identifier.  
+   * @param orderInfoId Identifier returned by validateOrderInfo, or an empty string.  
+   * @param shippingOptionId Identifier of a chosen shipping option, if applicable.  
+   * @param credentials The credentials chosen by user for payment.  
+   * @param tipAmount Chosen by the user amount of tip in the smallest units of the currency.
+   *
+   * @return [TdApi.PaymentResult] Contains the result of a payment request.
+   */
+  suspend fun PaymentForm.send(
+    chatId: Long,
+    messageId: Long,
+    orderInfoId: String?,
+    shippingOptionId: String?,
+    credentials: InputCredentials?,
+    tipAmount: Long
+  ) = api.sendPaymentForm(chatId, messageId, this.id, orderInfoId, shippingOptionId, credentials,
+      tipAmount)
+
+  /**
+   * Suspend function, which deletes a profile photo.
    */
   suspend fun ProfilePhoto.delete() = api.deleteProfilePhoto(this.id)
 
@@ -61,41 +82,42 @@ interface CommonKtx : BaseKtx {
    * Even the request succeeds, the file can be used only if it is still accessible to the user. For
    * example, if the file is from a message, then the message must be not deleted and accessible to the
    * user. If the file database is disabled, then the corresponding object with the file must be
-   * preloaded by the client.
+   * preloaded by the application.
    *
-   * @param fileType File type, if known.
+   * @param fileType File type; pass null if unknown.
    *
    * @return [TdApi.File] Represents a file.
    */
   suspend fun RemoteFile.get(fileType: FileType?) = api.getRemoteFile(this.id, fileType)
 
   /**
-   * Suspend function, which terminates a session of the current user.
-   */
-  suspend fun Session.terminate() = api.terminateSession(this.id)
-
-  /**
    * Suspend function, which sends a filled-out payment form to the bot for final verification.
    *
    * @param chatId Chat identifier of the Invoice message.  
    * @param messageId Message identifier.  
-   * @param orderInfoId Identifier returned by ValidateOrderInfo, or an empty string.  
-   * @param credentials The credentials chosen by user for payment.
+   * @param paymentFormId Payment form identifier returned by getPaymentForm.  
+   * @param orderInfoId Identifier returned by validateOrderInfo, or an empty string.  
+   * @param credentials The credentials chosen by user for payment.  
+   * @param tipAmount Chosen by the user amount of tip in the smallest units of the currency.
    *
    * @return [TdApi.PaymentResult] Contains the result of a payment request.
    */
   suspend fun ShippingOption.sendPaymentForm(
     chatId: Long,
     messageId: Long,
+    paymentFormId: Long,
     orderInfoId: String?,
-    credentials: InputCredentials?
-  ) = api.sendPaymentForm(chatId, messageId, orderInfoId, this.id, credentials)
+    credentials: InputCredentials?,
+    tipAmount: Long
+  ) = api.sendPaymentForm(chatId, messageId, paymentFormId, orderInfoId, this.id, credentials,
+      tipAmount)
 
   /**
-   * Suspend function, which changes the sticker set of a supergroup; requires canChangeInfo rights.
+   * Suspend function, which changes the sticker set of a supergroup; requires canChangeInfo
+   * administrator right.
    *
    * @param supergroupId Identifier of the supergroup.  
    */
-  suspend fun StickerSet.setSupergroup(supergroupId: Int) =
+  suspend fun StickerSet.setSupergroup(supergroupId: Long) =
       api.setSupergroupStickerSet(supergroupId, this.id)
 }

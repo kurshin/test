@@ -53,8 +53,8 @@ fun TelegramFlow.havePendingNotificationsFlow(): Flow<UpdateHavePendingNotificat
     this.getUpdatesFlowOfType()
 
 /**
- * emits [UpdateServiceNotification] if service notification from the server. Upon receiving this
- * the client must show a popup with the content of the notification.
+ * emits [UpdateServiceNotification] if a service notification from the server was received. Upon
+ * receiving this the application must show a popup with the content of the notification.
  */
 fun TelegramFlow.serviceNotificationFlow(): Flow<UpdateServiceNotification> =
     this.getUpdatesFlowOfType()
